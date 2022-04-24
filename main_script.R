@@ -39,13 +39,20 @@ sum(is.na(secom))
 #first quartile, third quartile, std.dev. and percentage of 
 #NA'S per feature
 NA_Table <- data.frame()
+
 for(i in colnames(secom)){
   a <- subset(secom, select = i)
   b <- sum(is.na(a))
   print(i)
   print(b)
-  c <- data.frame(i, b)
+
+  
+  #Gazal-Caclulating percentage of null values per feature
+  perc_null <- (b/nrow(a))*100
+  
+  c <- data.frame(i, b,perc_null)
   NA_Table <- rbind(NA_Table,c)
+  
 }
 
 # The SECOM dataset includes 1567 rows (observations) with 590 columns 
