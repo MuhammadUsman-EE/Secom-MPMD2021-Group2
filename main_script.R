@@ -46,3 +46,5 @@ par(las=2)
 secom.barplot.1<-barplot(table(secom$Status),horiz = TRUE,names.arg = c("Pass","Fail"), col = c("limegreen","azure3"), xlim = c(0,1600),main = "Frequency of Pass and Fail")
 text(secom.barplot.1,x = table(secom$Status),labels = table(secom$Status), pos = 4)
 secom.barplot.1
+
+##commenting from new branch
