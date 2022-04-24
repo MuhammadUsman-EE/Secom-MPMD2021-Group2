@@ -61,4 +61,11 @@ secom.status<-data.frame(table(secom$Status,dnn = c("Status")))
 par(las=2)
 secom.barplot.1<-barplot(table(secom$Status),horiz = TRUE,names.arg = c("Pass","Fail"), col = c("limegreen","azure3"), xlim = c(0,1600),main = "Frequency of Pass and Fail")
 text(secom.barplot.1,x = table(secom$Status),labels = table(secom$Status), pos = 4)
+<<<<<<< HEAD
+=======
+secom.barplot.1
+
+##commenting from new branch
+##testing Gazal Branch
+>>>>>>> 35f439692adc35b14c0831fbe0125c4a41099023
 secom.barplot.1
