@@ -31,7 +31,23 @@ colnames(secom.label)<-c("Status", "Timestamp")
 secom<-cbind(secom.label,secom.data)
 kable(head(secom[,1:8],15))
 dim(secom.data)
-secom
+View(secom)
+sum(is.na(secom))
+
+#we create an empty data frame to run our loop to identify
+#NA values for each Feature, we will add as well mean, median
+#first quartile, third quartile, std.dev. and percentage of 
+#NA'S per feature
+NA_Table <- data.frame()
+for(i in colnames(secom)){
+  a <- subset(secom, select = i)
+  b <- sum(is.na(a))
+  print(i)
+  print(b)
+  c <- data.frame(i, b)
+  NA_Table <- rbind(NA_Table,c)
+}
+
 # The SECOM dataset includes 1567 rows (observations) with 590 columns 
 #representing 590 features/signals collected from sensors, together with 
 #the labels representing pass (-1) / fail (1) yield for in house line testing 
@@ -45,8 +61,3 @@ secom.status<-data.frame(table(secom$Status,dnn = c("Status")))
 par(las=2)
 secom.barplot.1<-barplot(table(secom$Status),horiz = TRUE,names.arg = c("Pass","Fail"), col = c("limegreen","azure3"), xlim = c(0,1600),main = "Frequency of Pass and Fail")
 text(secom.barplot.1,x = table(secom$Status),labels = table(secom$Status), pos = 4)
-secom.barplot.1
-
-##commenting from new branch
-##testing Gazal Branch
-secom.barplot.1
