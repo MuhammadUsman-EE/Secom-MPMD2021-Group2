@@ -40,17 +40,41 @@ sum(is.na(secom))
 #NA'S per feature
 NA_Table <- data.frame()
 
+
 for(i in colnames(secom)){
+  #i = "Status"
   a <- subset(secom, select = i)
+  a <- a[, i]
   b <- sum(is.na(a))
   print(i)
   print(b)
-
+  
   
   #Gazal-Caclulating percentage of null values per feature
-  perc_null <- (b/nrow(a))*100
+  if(b != 0) {
+    perc_null <- (b/length(a))*100
+    perc_null <- round(perc_null, digits = 2)
+  } else {
+    perc_null = 0
+  }
   
-  c <- data.frame(i, b,perc_null)
+  print(perc_null)
+  
+  
+  #descriptives (mean, median, stdve, q1, q3, 3s rules
+  if(is.numeric(a)){
+    m <- mean(a,na.rm = T)
+    m <- round(m, digits = 2)
+    st <- sd(a, na.rm = T)
+    st <- round(st, digits = 2)
+  } else {
+    m <- NA
+    st <- NA
+  }
+  print(m)
+  print(st)
+  
+  c <- data.frame(i, b, perc_null,m,st)
   NA_Table <- rbind(NA_Table,c)
   
 }
