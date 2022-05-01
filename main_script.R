@@ -32,19 +32,10 @@ colnames(secom.data)<-paste("Feature", 1:ncol(secom.data), sep = "_")
 colnames(secom.label)<-c("Status", "Timestamp")
 secom<-cbind(secom.label,secom.data)
 
-# Converting secom.labels to string format for zvalues2 values function
-secom_label_string <- lapply(secom.label, as.character)
-
-secom<-cbind(secom_label_string ,secom.data)
-
 kable(head(secom[,1:8],15))
 dim(secom.data)
 View(secom)
 sum(is.na(secom))
-
-####Check if coulmns are characters
-is.character(secom$Status)
-is.character(secom$Timestamp)
 
 #we create an empty data frame to run our loop to identify
 #NA values for each Feature, we will add as well mean, median
@@ -73,7 +64,7 @@ for(i in colnames(secom)){
   print(perc_null)
   
   
-  #descriptives (mean, median, stdve, q1, q3, 3s rules
+# Descriptives (mean, median, stdve, q1, q3, 3s rules
   if(is.numeric(a)){
     m <- mean(a,na.rm = T)
     m <- round(m, digits = 2)
@@ -91,6 +82,22 @@ for(i in colnames(secom)){
   
 }
 
+# remove(NA_Table)
+
+# Testing Function + Outliers
+NA_Table <- data.frame()
+
+for(i in colnames(secom)){
+  a <- subset(secom, select = i)
+  b <- sum(is.na(a))
+  
+  
+  print(outliers)
+  print(i)
+  print(b)
+  c <- data.frame(i, b,outliers)
+  NA_Table <- rbind(NA_Table,c)
+}
 
 # Outlier count
 
@@ -111,19 +118,20 @@ mean(na.omit(secom$Feature_1))
 
 z_score <- function(a) {(a- mean)/std_dev} #z_scores manual
 
-Zvalues2 <- ifelse(scale(a), center = TRUE, scale = TRUE)
-print(Zvalues2)
+zvalues2 <- ifelse(scale(a), center = TRUE, scale = TRUE)
+print(zvalues2)
 
 remove(mean)
 
 
 # The SECOM dataset includes 1567 rows (observations) with 590 columns 
-#representing 590 features/signals collected from sensors, together with 
-#the labels representing pass (-1) / fail (1) yield for in house line testing 
-#and associated date time stamp.  
+# representing 590 features/signals collected from sensors, together with 
+# the labels representing pass (-1) / fail (1) yield for in house line testing 
+# and associated date time stamp.  
 # Challenges of SECOM dataset and Data Preparation Steps
-## 1. Split the dataset into Training and Test set
+# 1. Split the dataset into Training and Test set
 # data frame of Frequency of Pass and Fail
+
 secom.status<-data.frame(table(secom$Status,dnn = c("Status")))
 
 # Bar chart of Frequency of Pass and Fail
