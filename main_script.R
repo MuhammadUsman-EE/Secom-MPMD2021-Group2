@@ -134,3 +134,4 @@ secom.train_index<-createDataPartition(secom$Status, times = 1,p = 0.8, list = F
 secom.training<-secom[secom.train_index,]
 secom.data.train<-secom.training[,-c(1,2)]
 secom.test<-secom[-secom.train_index,]
+#Done
