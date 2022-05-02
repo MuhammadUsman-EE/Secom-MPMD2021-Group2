@@ -1,28 +1,10 @@
-if(!require("pacman")) install.packages("pacman")
-library("pacman")
 library('tidyverse')
 library('tidyselect')
-p_load("ggplot2")
-p_load("knitr")
-p_load("caret")
-p_load("raster")
-p_load("scales")
-p_load("Boruta")
-p_load("randomForest")
-p_load("DMwR")
-p_load("e1071")
-p_load("ROSE")
-p_load("ROCR")
-p_load("dplyr")
-p_load("corrplot")
-p_load("RCurl")
-p_load("Matrix") 
-p_load("stats")
-p_load("car")
-p_load("MASS")
-p_load("fBasics")
-p_load("reshape2")
-p_load("data.table")
+library("ggplot2")
+library("dplyr")
+library("corrplot")
+library("reshape2")
+library("data.table")
 
 # Overview of SECOM dataset
 # Getting SECOM dataset
@@ -37,79 +19,70 @@ sum(is.na(secom))
 #NA values for each Feature, we will add as well mean, median
 #first quartile, third quartile, std.dev. and percentage of 
 #NA'S per feature
-NA_Table <- data.frame()
+final_column_descriptives <- data.frame()
 
 
-for(i in colnames(secom)){
-  #i = "Status"
-  a <- subset(secom, select = i)
-  a <- a[, i]
-  b <- sum(is.na(a))
-  print(i)
-  print(b)
-  View(i)
+for(column_name in colnames(secom)){
   
-# Caclulating percentage of null values per feature
-  if(b != 0) {
-    perc_null <- (b/length(a))*100
-    perc_null <- round(perc_null, digits = 2)
+  # Selecting Only the current column in a loop
+  selected_col <- subset(secom, select = column_name)
+  # Convert column dataframe to vector
+  selected_col <- selected_col[, column_name]
+  # Count total NA's of the selected column
+  SUM_NA <- sum(is.na(selected_col))
+
+
+  
+# Caclulating percentage of NULL values if NULL exist
+  if(SUM_NA != 0) {
+    Percentage_NA <- (SUM_NA/length(selected_col))*100
+    Percentage_NA <- round(Percentage_NA, digits = 2)
   } else {
-    perc_null = 0
+    Percentage_NA = 0
   }
   
-  print(perc_null)
   
   
 # Descriptives (mean, median, stdve, q1, q3, 3s rules
-  if(is.numeric(a)){
-    m <- mean(a,na.rm = T)
-    m <- round(m, digits = 2)
-    st <- sd(a, na.rm = T)
-    st <- round(st, digits = 2)
-    q1 <- quantile(a,0.25, na.rm = T)
-    q3 <- quantile(a,0.75, na.rm =T)
+  if(is.numeric(selected_col)){
+    Mean <- mean(selected_col,na.rm = T)
+    Mean <- round(Mean, digits = 2)
+    Median <- median(selected_col, na.rm = T)
+    Median <- round(Median, digits = 2)
+    Standard_Deviation <- sd(selected_col, na.rm = T)
+    Standard_Deviation <- round(Standard_Deviation, digits = 2)
+    Q1 <- quantile(selected_col,0.25, na.rm = T)
+    Q1 <- round(Q1, digits = 2)
+    Q3 <- quantile(selected_col,0.75, na.rm =T)
+    Q3 <- round(Q3, digits = 2)
   } else {
-    m <- NA
-    st <- NA
-    q1 <- NA
-    q3 <- NA
+    Average <- NA
+    Standard_Deviation <- NA
+    Median <- NA
+    Q1 <- NA
+    Q3 <- NA
   }
-  print(m)
-  print(st)
-  print(q1)
-  print(q3)
+
+  # Finding outliers in columns
+  Total_Outliers_3s <- (selected_col > Mean + (3 * Standard_Deviation)) | (selected_col < Mean - (3 * Standard_Deviation))
+  Total_Outliers_3s <- sum(Total_Outliers_3s, na.rm = T)
   
-  c <- data.frame(i, b, perc_null,m,st,q1,q3)
-  NA_Table <- rbind(NA_Table,c)
+  # Finding unique values in each column
+  Unique_Values <- length(unique(na.omit(selected_col)))
+  
+  combined_descrptive <- data.frame(column_name, SUM_NA, Percentage_NA, Mean, Median, Standard_Deviation, Q1,Q3, Total_Outliers_3s, Unique_Values)
+  final_column_descriptives <- rbind(final_column_descriptives,combined_descrptive)
+  
+  
   
 }
 
-# remove(NA_Table)
+# Finding Duplicate Rows in the Dataframe
 
-# Testing Function + Outliers
-NA_Table <- data.frame()
-
-for(i in colnames(secom)){
-  a <- subset(secom, select = i)
-  b <- sum(is.na(a))
-  
-  
-  print(outliers)
-  print(i)
-  print(b)
-  c <- data.frame(i, b,outliers)
-  NA_Table <- rbind(NA_Table,c)
-}
-
-# Outlier count
-
-FindOutliers <- function(secom.data) {
-  flag<- ifelse(test = scale(secom.data) > 3 | scale(secom.data)< -3, yes = 1, no = 0)
-  result <- which(flag == 1)
-  length(result)
-}
-outliers <- sapply(secom.data, FindOutliers)
-outliers <- data.frame(outliers)
+c <- secom[!duplicated(as.list(secom))]
+duplicate_columns <- ncol(secom) - ncol(secom[!duplicated(as.list(secom))])
+print('Number of Duplicate columns')
+print(duplicate_columns)
 
 # The SECOM dataset includes 1567 rows (observations) with 590 columns 
 # representing 590 features/signals collected from sensors, together with 
