@@ -5,6 +5,7 @@ library("dplyr")
 library("corrplot")
 library("reshape2")
 library("data.table")
+library("caret")
 
 # Overview of SECOM dataset
 # Getting SECOM dataset
@@ -14,11 +15,12 @@ colnames(secom.data)<-paste("Feature", 1:ncol(secom.data), sep = "_")
 colnames(secom.label)<-c("Status", "Timestamp")
 secom<-cbind(secom.label,secom.data)
 sum(is.na(secom))
+nrow(secom)
 
 #we create an empty data frame to run our loop to identify
 #NA values for each Feature, we will add as well mean, median
-#first quartile, third quartile, std.dev. and percentage of 
-#NA'S per feature
+#first quartile, third quartile, std.dev., percentage of 
+#NA'S per feature and unique values per feature
 final_column_descriptives <- data.frame()
 
 
@@ -31,7 +33,6 @@ for(column_name in colnames(secom)){
   # Count total NA's of the selected column
   SUM_NA <- sum(is.na(selected_col))
 
-
   
 # Caclulating percentage of NULL values if NULL exist
   if(SUM_NA != 0) {
@@ -40,7 +41,6 @@ for(column_name in colnames(secom)){
   } else {
     Percentage_NA = 0
   }
-  
   
   
 # Descriptives (mean, median, stdve, q1, q3, 3s rules
@@ -73,8 +73,6 @@ for(column_name in colnames(secom)){
   combined_descrptive <- data.frame(column_name, SUM_NA, Percentage_NA, Mean, Median, Standard_Deviation, Q1,Q3, Total_Outliers_3s, Unique_Values)
   final_column_descriptives <- rbind(final_column_descriptives,combined_descrptive)
   
-  
-  
 }
 
 # Finding Duplicate Rows in the Dataframe
@@ -88,23 +86,74 @@ print(duplicate_columns)
 # representing 590 features/signals collected from sensors, together with 
 # the labels representing pass (-1) / fail (1) yield for in house line testing 
 # and associated date time stamp.  
-# Challenges of SECOM dataset and Data Preparation Steps
-# 1. Split the dataset into Training and Test set
-# data frame of Frequency of Pass and Fail
 
 secom.status<-data.frame(table(secom$Status,dnn = c("Status")))
-
-# Bar chart of Frequency of Pass and Fail
-par(las=2)
-secom.barplot.1<-barplot(table(secom$Status),horiz = TRUE,names.arg = c("Pass","Fail"), col = c("limegreen","azure3"), xlim = c(0,1600),main = "Frequency of Pass and Fail")
-text(secom.barplot.1,x = table(secom$Status),labels = table(secom$Status), pos = 4)
-
-# Split the dataset with respect to class variables proportions (ratio 14:1)
-## generates indexes for randomly splitting the data into training and test sets
-secom.train_index<-createDataPartition(secom$Status, times = 1,p = 0.8, list = FALSE) # to put 80% of data to training set
 
 ## define the training and test sets by using above index
 secom.training<-secom[secom.train_index,]
 secom.data.train<-secom.training[,-c(1,2)]
 secom.test<-secom[-secom.train_index,]
+
+#Plotting histograms
+#histogram of nulls values
+hist(final_column_descriptives$SUM_NA,
+     labels = TRUE, ylim = c(0,20), 
+     breaks = 20, 
+     main = "Frequency of Null Values in features", 
+     xlab = "Number of Missing Values", 
+     col = ("limegreen"))
+
+#histogram of missing values percentages
+hist(final_column_descriptives$Percentage_NA, 
+     labels = TRUE, 
+     ylim = c(0,20), 
+     xlim = c(0,100), 
+     breaks = 20, 
+     main = "Percent of Null Values in features", 
+     xlab = "Percent of Missing Values", 
+     col = ("limegreen"))
+
+#histogram of volatilities
+hist((final_column_descriptives$Standard_Deviation),
+     ylim = c(0,20), 
+     breaks = 100, 
+     xlim = c(0,7000), 
+     main ="Standard Deviations in the dataset", 
+     xlab = "Standard Deviations", 
+     col = ("limegreen"))
+
+#histogram of outliers 
+hist((final_column_descriptives$Total_Outliers_3s),
+     labels = TRUE, 
+     ylim = c(0,25), 
+     breaks = 50, 
+     xlim = c(0,1700), 
+     main = "Total number of Outliers based on 3s Rule", 
+     xlab = "Number of Outliers",
+     col = ("limegreen"))
+
+
+#count number of features that have 1 unique value
+sum(final_column_descriptives$Unique_Values == 1)
+
+
+# Bar chart of Frequency of Pass and Fail
+par(las=2)
+secom.barplot.1<-barplot(table(secom$Status),
+                         horiz = TRUE,
+                         names.arg = c("Pass","Fail"), 
+                         col = c("limegreen","azure3"), 
+                         xlim = c(0,1600),
+                         main = "Frequency of Pass and Fail")
+
+text(secom.barplot.1,
+     x = table(secom$Status),
+     labels = table(secom$Status), 
+     pos = 4)
+
+# Split the dataset with respect to class variables proportions (ratio 14:1)
+## generates indexes for randomly splitting the data into training and test sets
+secom.train_index<-createDataPartition(secom$Status, times = 1,p = 0.8, list = FALSE) # to put 80% of data to training set
+
+
 #Done
