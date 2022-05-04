@@ -17,6 +17,12 @@ secom<-cbind(secom.label,secom.data)
 sum(is.na(secom))
 nrow(secom)
 
+
+Select_null_percentage <- final_column_descriptives$Percentage_NA
+Filter_percentage_55 <- Select_null_percentage[Select_null_percentage > 55]  
+length(Filter_percentage_55)
+
+
 #we create an empty data frame to run our loop to identify
 #NA values for each Feature, we will add as well mean, median
 #first quartile, third quartile, std.dev., percentage of 
