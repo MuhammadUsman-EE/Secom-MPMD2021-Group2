@@ -48,7 +48,7 @@ for(column_name in colnames(secom)){
     Percentage_NA = 0
   }
   
-  
+
 # Descriptives (mean, median, stdve, q1, q3, 3s rules
   if(is.numeric(selected_col)){
     Mean <- mean(selected_col,na.rm = T)
@@ -95,10 +95,6 @@ print(duplicate_columns)
 
 secom.status<-data.frame(table(secom$Status,dnn = c("Status")))
 
-## define the training and test sets by using above index
-secom.training<-secom[secom.train_index,]
-secom.data.train<-secom.training[,-c(1,2)]
-secom.test<-secom[-secom.train_index,]
 
 #Plotting histograms
 #histogram of nulls values
@@ -127,6 +123,7 @@ hist((final_column_descriptives$Standard_Deviation),
      main ="Standard Deviations in the dataset", 
      xlab = "Standard Deviations", 
      col = ("limegreen"))
+#LINE to show volatilities 
 
 #histogram of outliers 
 hist((final_column_descriptives$Total_Outliers_3s),
@@ -161,5 +158,10 @@ text(secom.barplot.1,
 ## generates indexes for randomly splitting the data into training and test sets
 secom.train_index<-createDataPartition(secom$Status, times = 1,p = 0.8, list = FALSE) # to put 80% of data to training set
 
+## define the training and test sets by using above index
+secom.training<-secom[secom.train_index,]
+secom.data.train<-secom.training[,-c(1,2)]
+secom.test<-secom[-secom.train_index,]
 
-#Done
+
+#Fixed Training and test done new
