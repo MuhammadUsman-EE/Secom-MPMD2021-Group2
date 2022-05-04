@@ -8,7 +8,9 @@ library("data.table")
 library("caret")
 
 # Overview of SECOM dataset
-# Getting SECOM dataset
+# Getting SECOM dataset an overview to understand the ammount of observations we encounter
+# and the variables. In this starting code we will add the 'FEATURE' to all columns and
+# join both of the given tables. 
 secom.data<-read.table("https://archive.ics.uci.edu/ml/machine-learning-databases/secom/secom.data")
 secom.label<-read.table("https://archive.ics.uci.edu/ml/machine-learning-databases/secom/secom_labels.data")
 colnames(secom.data)<-paste("Feature", 1:ncol(secom.data), sep = "_")
@@ -18,14 +20,8 @@ sum(is.na(secom))
 nrow(secom)
 
 
-Select_null_percentage <- final_column_descriptives$Percentage_NA
-Filter_percentage_55 <- Select_null_percentage[Select_null_percentage > 55]  
-length(Filter_percentage_55)
-
-
-#we create an empty data frame to run our loop to identify
-#NA values for each Feature, we will add as well mean, median
-#first quartile, third quartile, std.dev., percentage of 
+#we create an empty data frame to run our loop to identify NA values for each Feature,
+#we will add as well mean, median, first quartile, third quartile, std.dev., percentage of 
 #NA'S per feature and unique values per feature
 final_column_descriptives <- data.frame()
 
@@ -68,7 +64,7 @@ for(column_name in colnames(secom)){
     Q1 <- NA
     Q3 <- NA
   }
-
+  
   # Finding outliers in columns
   Total_Outliers_3s <- (selected_col > Mean + (3 * Standard_Deviation)) | (selected_col < Mean - (3 * Standard_Deviation))
   Total_Outliers_3s <- sum(Total_Outliers_3s, na.rm = T)
@@ -80,6 +76,11 @@ for(column_name in colnames(secom)){
   final_column_descriptives <- rbind(final_column_descriptives,combined_descrptive)
   
 }
+
+# Find out how many columns does not comply with our threshold of 55% for NaN/Null values
+Select_null_percentage <- final_column_descriptives$Percentage_NA
+Filter_percentage_55 <- Select_null_percentage[Select_null_percentage > 55]  
+length(Filter_percentage_55)
 
 # Finding Duplicate Rows in the Dataframe
 
@@ -123,6 +124,8 @@ hist((final_column_descriptives$Standard_Deviation),
      main ="Standard Deviations in the dataset", 
      xlab = "Standard Deviations", 
      col = ("limegreen"))
+abline(v= 5, col = "red", lty = 2)
+?abline
 #LINE to show volatilities 
 
 #histogram of outliers 
@@ -155,7 +158,8 @@ text(secom.barplot.1,
      pos = 4)
 
 # Split the dataset with respect to class variables proportions (ratio 14:1)
-## generates indexes for randomly splitting the data into training and test sets
+# createDataPartition generates indexes for randomly splitting the data into 
+# training and test sets
 secom.train_index<-createDataPartition(secom$Status, times = 1,p = 0.8, list = FALSE) # to put 80% of data to training set
 
 ## define the training and test sets by using above index
