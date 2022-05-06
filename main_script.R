@@ -6,11 +6,10 @@ library("corrplot")
 library("reshape2")
 library("data.table")
 library("caret")
+library('reshape2')
 
 # Overview of SECOM dataset
-# Getting SECOM dataset an overview to understand the ammount of observations we encounter
-# and the variables. In this starting code we will add the 'FEATURE' to all columns and
-# join both of the given tables. 
+# Getting SECOM dataset
 secom.data<-read.table("https://archive.ics.uci.edu/ml/machine-learning-databases/secom/secom.data")
 secom.label<-read.table("https://archive.ics.uci.edu/ml/machine-learning-databases/secom/secom_labels.data")
 colnames(secom.data)<-paste("Feature", 1:ncol(secom.data), sep = "_")
@@ -19,10 +18,12 @@ secom<-cbind(secom.label,secom.data)
 sum(is.na(secom))
 nrow(secom)
 
-#we create an empty data frame to run our loop to identify NA values for each Feature,
-#we will add as well mean, median, first quartile, third quartile, std.dev., percentage of 
+#we create an empty data frame to run our loop to identify
+#NA values for each Feature, we will add as well mean, median
+#first quartile, third quartile, std.dev., percentage of 
 #NA'S per feature and unique values per feature
 final_column_descriptives <- data.frame()
+
 
 for(column_name in colnames(secom)){
   
@@ -32,6 +33,7 @@ for(column_name in colnames(secom)){
   selected_col <- selected_col[, column_name]
   # Count total NA's of the selected column
   SUM_NA <- sum(is.na(selected_col))
+
   
 # Caclulating percentage of NULL values if NULL exist
   if(SUM_NA != 0) {
@@ -40,7 +42,8 @@ for(column_name in colnames(secom)){
   } else {
     Percentage_NA = 0
   }
-
+  
+  
 # Descriptives (mean, median, stdve, q1, q3, 3s rules
   if(is.numeric(selected_col)){
     Mean <- mean(selected_col,na.rm = T)
@@ -60,7 +63,7 @@ for(column_name in colnames(secom)){
     Q1 <- NA
     Q3 <- NA
   }
-  
+
   # Finding outliers in columns
   Total_Outliers_3s <- (selected_col > Mean + (3 * Standard_Deviation)) | (selected_col < Mean - (3 * Standard_Deviation))
   Total_Outliers_3s <- sum(Total_Outliers_3s, na.rm = T)
@@ -73,11 +76,6 @@ for(column_name in colnames(secom)){
   
 }
 
-# Find out how many columns does not comply with our threshold of 55% for NaN/Null values
-Select_null_percentage <- final_column_descriptives$Percentage_NA
-Filter_percentage_55 <- Select_null_percentage[Select_null_percentage > 55]  
-length(Filter_percentage_55)
-
 # Finding Duplicate Rows in the Dataframe
 
 c <- secom[!duplicated(as.list(secom))]
@@ -85,12 +83,64 @@ duplicate_columns <- ncol(secom) - ncol(secom[!duplicated(as.list(secom))])
 print('Number of Duplicate columns')
 print(duplicate_columns)
 
+
+library(digest)
+check <- secom[!duplicated(lapply(secom, digest))]
+
+duplicated(t(testframe))
+
+
+
+# Standard Deviation Histogram
+sd_his <- final_column_descriptives$Standard_Deviation
+
+sd_his <- sd_his[!is.na(sd_his)]
+
+fun <- dnorm(x2, mean = mean(x), sd = sd(x))
+
+hist(sd_his, prob = TRUE, ylim = c(0, max(fun)),
+     main = "Histogram with density curve")
+lines(density(sd_his), col = 4, lwd = 2)
+# Correlation Matrix
+
+
+corr_mat <- round(cor(secom.data, use = 'pairwise.complete.obs'),2)
+
+check <- corr_mat %>%                               # start from the correlation matrix
+  as.table() %>% as.data.frame() %>%       # Marek's answer in TidyVerse format
+  subset(Var1 != Var2) %>% # omit diagonal and keep significant correlations (optional...)
+  filter(!duplicated(paste0(pmax(as.character(Var1), as.character(Var2)), pmin(as.character(Var1), as.character(Var2))))) %>%
+  # keep only unique occurrences, as.character because Var1 and Var2 are factors
+  arrange(desc(Freq))                      # sort by Freq
+
+#corr_mat[(abs(corr_mat) < 0.6) 
+
+
+# Weakly correlated
+weak_corr <- check %>% filter((Freq > 0.3 & Freq  <= 0.5) | (Freq > -0.3 & Freq <= -0.5))
+print((nrow(weak_corr)/ nrow(check)) * 100)
+
+
+weak_corr <- check %>% filter((Freq == 1) | (Freq == -1))
+print((nrow(weak_corr)/ nrow(check)) * 100)
+
+#write.csv(check, file = 'check.csv')
+
+library(h2o)
+library(lares)
+
+
+corr_cross(cor_data,
+           max_pvalue = 0.05, 
+           top = 10  
+)
 # The SECOM dataset includes 1567 rows (observations) with 590 columns 
 # representing 590 features/signals collected from sensors, together with 
 # the labels representing pass (-1) / fail (1) yield for in house line testing 
 # and associated date time stamp.  
 
 secom.status<-data.frame(table(secom$Status,dnn = c("Status")))
+
 
 #Plotting histograms
 #histogram of nulls values
@@ -119,9 +169,6 @@ hist((final_column_descriptives$Standard_Deviation),
      main ="Standard Deviations in the dataset", 
      xlab = "Standard Deviations", 
      col = ("limegreen"))
-abline(v= 5, col = "red", lty = 2)
-?abline
-#LINE to show volatilities 
 
 #histogram of outliers 
 hist((final_column_descriptives$Total_Outliers_3s),
@@ -133,8 +180,10 @@ hist((final_column_descriptives$Total_Outliers_3s),
      xlab = "Number of Outliers",
      col = ("limegreen"))
 
+
 #count number of features that have 1 unique value
 sum(final_column_descriptives$Unique_Values == 1)
+
 
 # Bar chart of Frequency of Pass and Fail
 par(las=2)
@@ -151,10 +200,9 @@ text(secom.barplot.1,
      pos = 4)
 
 # Split the dataset with respect to class variables proportions (ratio 14:1)
-# createDataPartition generates indexes for randomly splitting the data into 
-# training and test sets
-secom.train_index<-createDataPartition(secom$Status, times = 1,p = 0.8, list = FALSE) # to put 80% of data to training set
+## generates indexes for randomly splitting the data into training and test sets
 
+secom.train_index<-createDataPartition(secom$Status, times = 1,p = 0.8, list = FALSE) # to put 80% of data to training set
 ## define the training and test sets by using above index
 secom.training<-secom[secom.train_index,]
 secom.data.train<-secom.training[,-c(1,2)]
