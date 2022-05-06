@@ -19,12 +19,10 @@ secom<-cbind(secom.label,secom.data)
 sum(is.na(secom))
 nrow(secom)
 
-
 #we create an empty data frame to run our loop to identify NA values for each Feature,
 #we will add as well mean, median, first quartile, third quartile, std.dev., percentage of 
 #NA'S per feature and unique values per feature
 final_column_descriptives <- data.frame()
-
 
 for(column_name in colnames(secom)){
   
@@ -34,7 +32,6 @@ for(column_name in colnames(secom)){
   selected_col <- selected_col[, column_name]
   # Count total NA's of the selected column
   SUM_NA <- sum(is.na(selected_col))
-
   
 # Caclulating percentage of NULL values if NULL exist
   if(SUM_NA != 0) {
@@ -43,7 +40,6 @@ for(column_name in colnames(secom)){
   } else {
     Percentage_NA = 0
   }
-  
 
 # Descriptives (mean, median, stdve, q1, q3, 3s rules
   if(is.numeric(selected_col)){
@@ -96,7 +92,6 @@ print(duplicate_columns)
 
 secom.status<-data.frame(table(secom$Status,dnn = c("Status")))
 
-
 #Plotting histograms
 #histogram of nulls values
 hist(final_column_descriptives$SUM_NA,
@@ -138,10 +133,8 @@ hist((final_column_descriptives$Total_Outliers_3s),
      xlab = "Number of Outliers",
      col = ("limegreen"))
 
-
 #count number of features that have 1 unique value
 sum(final_column_descriptives$Unique_Values == 1)
-
 
 # Bar chart of Frequency of Pass and Fail
 par(las=2)
@@ -166,6 +159,3 @@ secom.train_index<-createDataPartition(secom$Status, times = 1,p = 0.8, list = F
 secom.training<-secom[secom.train_index,]
 secom.data.train<-secom.training[,-c(1,2)]
 secom.test<-secom[-secom.train_index,]
-
-
-#Fixed Training and test done new
