@@ -19,6 +19,10 @@ p_load("reshape2")
 p_load("data.table")
 p_load("caret")
 p_load('reshape2')
+install.packages(("outliers"))
+p_load("outliers")
+install.packages("DescTools")
+library(DescTools)
 
 
 # Importing SECOM dataset - Directly from Online Repository
@@ -53,6 +57,7 @@ table(secom.test$Status)
 #drop columns that have one unique value
 nzv <- nearZeroVar(secom.training)
 filteredDescr <- secom.training[, -nzv]
+
 #secom training has 590, filtered 463
 
 #drop features with 45% or more missing values 
@@ -72,14 +77,41 @@ Total_Outliers_3s <- sum(Total_Outliers_3s, na.rm = T)
 ############################################################################################################################
 #Removing columns with over 45% NA values
 #Method 1
-x <- filteredDescr[, -which(colMeans(is.na(filteredDescr)) > 0.45)]
-length(x)
+Filter_x <- filteredDescr[, -which(colMeans(is.na(filteredDescr)) > 0.45)]
+length(Filter_x)
 View(x)
 length(x)
 
 #Method 2
 
-y <- filteredDescr[lapply(filteredDescr,function(x) sum(is.na(x))/ length(x)) < 0.45 ]
-length(y)C
+Filter_y <- filteredDescr[lapply(filteredDescr,function(x) sum(is.na(x))/ length(x)) < 0.45 ]
+length(y)
 View(y)
 length(y)
+
+
+#####Outlier Identification or treatment#####
+
+findoutliers <- function(z) {
+  # Find the outliers in the scaled column
+  flag <- ifelse(test = scale(z) > 3 |  scale(z) < -3, yes = 1, no = 0)
+  result <- which(flag == 1)
+  length(result)
+}
+outliers <- sapply(Filter_x, findoutliers)
+outliers <- data.frame(outliers)
+print(outliers)
+sum(outliers)
+length(outliers)
+
+####Outlier Replacement with 3s
+Outlier_Replacement <- apply(Filter_x, FUN=Winsorize, MARGIN = 2, probs = c(0.001,0.999), na.rm = TRUE)
+length(Outlier_Replacement)
+
+Outlier_Test<- sapply(Outlier_Replacement, findoutliers)
+Outlier_Test<- data.frame(Outlier_Test)
+sum(Outlier_Test)
+
+install.packages("xlsx")
+p_load('xlsx')
+write.xlsx(outliers, "outliers.xlsx")
