@@ -19,6 +19,8 @@ p_load("reshape2")
 p_load("data.table")
 p_load("caret")
 p_load('reshape2')
+p_load("outliers")
+p_load("DescTools")
 
 
 # Importing SECOM dataset - Directly from Online Repository
@@ -56,14 +58,31 @@ filteredDescr <- secom.training[, -nzv]
 #secom training has 590, filtered 463
 
 #drop features with 45% or more missing values 
-
+filterednan <- filteredDescr[, -which(colMeans(is.na(filteredDescr)) > 0.45)]
+length(filterednan)
 
 #3S boundaries shift
 # Scale the selected column
+#####Outlier Identification or treatment#####
 
-selected_col_scaled <- scale(secom.training[,c(-1,-2)])
+findoutliers <- function(filterednan) {
+  # Find the outliers in the scaled column
+  flag <- ifelse(test = scale(filterednan) > 3 |  scale(filterednan) < -3, yes = 1, no = 0)
+  result <- which(flag == 1)
+  length(result)
+}
+outliers <- sapply(filterednan, findoutliers)
+outliers <- data.frame(outliers)
+print(outliers)
+sum(outliers)
+View(outliers)
 
-# Finding outliers in the scaled column
-Total_Outliers_3s <- (selected_col_scaled > 3) | (selected_col_scaled < -3)
+#bringing the outliers into the 3s boundary
+outlier_replacement <- apply(filterednan, FUN = Winsorize, MARGIN = 2, probs = c(0.001, 0.999), na.rm = TRUE)
+length(outlier_replacement)
+length(outliers)
 
-Total_Outliers_3s <- sum(Total_Outliers_3s, na.rm = T)
+#test if there are still outliers 
+outlier_test <- sapply(outlier_replacement, findoutliers)
+outlier_test <- data.frame(outlier_test)
+sum(outlier_test)
