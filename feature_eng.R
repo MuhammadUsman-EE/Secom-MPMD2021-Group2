@@ -19,6 +19,8 @@ p_load("reshape2")
 p_load("data.table")
 p_load("caret")
 p_load('reshape2')
+p_load("outliers")
+p_load("DescTools")
 
 
 # Importing SECOM dataset - Directly from Online Repository
@@ -39,11 +41,11 @@ secom.train_index<-createDataPartition(secom$Status, times = 1,p = 0.8, list = F
 ## define the training and test sets by using above index
 secom.training<-secom[secom.train_index,]
 #dopping timestamp
-secom.training <- secom.training %>% select(-Timestamp)
 secom.test<-secom[-secom.train_index,]
 
 secom.training.label <- secom.training$Status
-secom.training <- secom.training %>% select(-Status)
+secom.training.Timestamp <- secom.training$Timestamp
+secom.training <- secom.training %>% select(-c(Status, Timestamp))
 
 #check characteristics 
 table(secom.training.label)
@@ -55,15 +57,57 @@ nzv <- nearZeroVar(secom.training)
 filteredDescr <- secom.training[, -nzv]
 #secom training has 590, filtered 463
 
-#drop features with 45% or more missing values 
+#drop features with 50% or more missing values 
+filterednan <- filteredDescr[, -which(colMeans(is.na(filteredDescr)) > 0.50)]
+length(filterednan)
+
+# Replace outliers with 3S boundaries
+
+outlier_replaced = data.frame(matrix(NA, nrow = nrow(filterednan)))  
+
+
+for(column_name in colnames(filterednan)) {
+  selected_col <- subset(filterednan, select = column_name)
+  selected_col <- selected_col[, column_name]
+  mean_col <- mean(selected_col, na.rm = T)
+  sd_col <- sd(selected_col, na.rm = T)
+  
+  
+  c <- ifelse(selected_col > (mean_col + (3*sd_col)), mean_col + (3*sd_col), selected_col)
+  c <- ifelse(c < (mean_col - (3*sd_col)), mean_col - (3*sd_col), selected_col)
+  
+  c <- as.data.frame(c)
+  colnames(c) <- column_name
+  
+  outlier_replaced <- outlier_replaced %>% add_column(c)
+  
+}
+
+outlier_replaced <- outlier_replaced %>% select(-c(1))
 
 
 #3S boundaries shift
 # Scale the selected column
+#####Outlier Identification or treatment#####
 
-selected_col_scaled <- scale(secom.training[,c(-1,-2)])
-
-# Finding outliers in the scaled column
-Total_Outliers_3s <- (selected_col_scaled > 3) | (selected_col_scaled < -3)
-
-Total_Outliers_3s <- sum(Total_Outliers_3s, na.rm = T)
+# findoutliers <- function(filterednan) {
+#   # Find the outliers in the scaled column
+#   flag <- ifelse(test = scale(filterednan) > 3 |  scale(filterednan) < -3, yes = 1, no = 0)
+#   result <- which(flag == 1)
+#   length(result)
+# }
+# outliers <- sapply(filterednan, findoutliers)
+# outliers <- data.frame(outliers)
+# print(outliers)
+# sum(outliers)
+# View(outliers)
+# 
+# #bringing the outliers into the 3s boundary
+# outlier_replacement <- apply(filterednan, FUN = Winsorize, MARGIN = 2, probs = c(0.001, 0.999), na.rm = TRUE)
+# length(outlier_replacement)
+# length(outliers)
+# 
+# #test if there are still outliers 
+# outlier_test <- sapply(outlier_replacement, findoutliers)
+# outlier_test <- data.frame(outlier_test)
+# sum(outlier_test)
