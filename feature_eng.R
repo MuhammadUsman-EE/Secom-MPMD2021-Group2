@@ -32,6 +32,8 @@ secom<-cbind(secom.label,secom.data)
 sum(is.na(secom))
 nrow(secom)
 
+secom$Status <- as.factor(secom$Status)
+
 # Split the dataset with respect to class variables proportions (ratio 14:1)
 ## generates indexes for randomly splitting the data into training and test sets
 # Setting seed so that the data is replicable.
