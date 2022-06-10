@@ -4,10 +4,12 @@ Sys.setenv(LANG = "en")
 
 # Checking if pacman library installed or not
 if (!require("pacman")) install.packages("pacman")
+if (!require("smotefamily"))  install.packages("smotefamily")
 
 # load pacman
 library(pacman)
-
+#load smotefamily
+library(smotefamily)
 
 p_load('tidyverse')
 p_load('tidyselect')
@@ -18,6 +20,7 @@ p_load("reshape2")
 p_load("data.table")
 p_load("caret")
 p_load('reshape2')
+p_load('DMwR2')
 
 
 # Importing SECOM dataset - Directly from Online Repository

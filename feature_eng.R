@@ -40,12 +40,12 @@ set.seed(12)
 secom.train_index<-createDataPartition(secom$Status, times = 1,p = 0.8, list = FALSE)
 ## define the training and test sets by using above index
 secom.training<-secom[secom.train_index,]
-#dopping timestamp
+#dropping timestamp
 secom.test<-secom[-secom.train_index,]
 
 secom.training.label <- secom.training$Status
 secom.training.Timestamp <- secom.training$Timestamp
-secom.training <- secom.training %>% select(-c(Status, Timestamp))
+secom.training <- secom.training %>% select(-c(Timestamp))
 
 #check characteristics 
 table(secom.training.label)
