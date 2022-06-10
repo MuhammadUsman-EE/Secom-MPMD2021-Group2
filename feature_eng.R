@@ -58,7 +58,7 @@ filteredDescr <- secom.training[, -nzv]
 #secom training has 590, filtered 463
 
 #drop features with 50% or more missing values 
-filterednan <- filteredDescr[, -which(colMeans(is.na(filteredDescr)) > 0.50)]
+filterednan <- filteredDescr[, -which(colMeans(is.na(filteredDescr)) > 0.45)]
 length(filterednan)
 
 # Replace outliers with 3S boundaries
@@ -85,6 +85,12 @@ for(column_name in colnames(filterednan)) {
 
 outlier_replaced <- outlier_replaced %>% select(-c(1))
 
+
+# Scaling features using Min Max Scaling method (0 - 1)
+
+process <- preProcess(outlier_replaced, method=c("range"))
+
+df <- predict(process, outlier_replaced)
 
 #3S boundaries shift
 # Scale the selected column
