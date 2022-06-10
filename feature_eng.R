@@ -117,3 +117,4 @@ df <- predict(process, outlier_replaced)
 # outlier_test <- sapply(outlier_replacement, findoutliers)
 # outlier_test <- data.frame(outlier_test)
 # sum(outlier_test)
+

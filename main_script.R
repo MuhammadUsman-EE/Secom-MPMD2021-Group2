@@ -5,11 +5,14 @@ Sys.setenv(LANG = "en")
 # Checking if pacman library installed or not
 if (!require("pacman")) install.packages("pacman")
 if (!require("smotefamily"))  install.packages("smotefamily")
+if (!require("ROSE"))  install.packages("ROSE")
 
 # load pacman
 library(pacman)
 #load smotefamily
 library(smotefamily)
+#load ROSE
+library(ROSE)
 
 p_load('tidyverse')
 p_load('tidyselect')
@@ -259,3 +262,4 @@ secom.train_index<-createDataPartition(secom$Status, times = 1,p = 0.8, list = F
 secom.training<-secom[secom.train_index,]
 secom.data.train<-secom.training[,-c(1,2)]
 secom.test<-secom[-secom.train_index,]
+
