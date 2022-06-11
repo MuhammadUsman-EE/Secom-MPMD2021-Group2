@@ -17,9 +17,10 @@ secom_balance.rose <- function(tVar, inputDF){
 
 # The lines below are for testing the above functions - they can be removed
 
-tempDF <- df[, c(1,2,3,4,5)]
-
+tempDF <- df[, c("Feature_1", "Feature_2", "Feature_3", "Feature_4", "Status")]
+tempDF
 smotest <- secom_balance.smote(tempDF, tempDF$Status)
+## Non-numeric error related to Status column being a factor
 rosetest <- secom_balance.rose(Status~., tempDF)
 
 table(rosetest$Status)
