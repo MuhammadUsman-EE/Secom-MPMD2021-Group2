@@ -47,7 +47,7 @@ secom.test<-secom[-secom.train_index,]
 
 secom.training.label <- secom.training$Status
 secom.training.Timestamp <- secom.training$Timestamp
-secom.training <- secom.training %>% select(-c(Timestamp))
+secom.training <- secom.training %>% select(-c(Status, Timestamp))
 
 #check characteristics 
 table(secom.training.label)
@@ -94,6 +94,10 @@ process <- preProcess(outlier_replaced, method=c("range"))
 
 df <- predict(process, outlier_replaced)
 
+Status <- c(secom.training.label)
+df <- cbind(df, Status)
+
+
 #3S boundaries shift
 # Scale the selected column
 #####Outlier Identification or treatment#####
@@ -119,4 +123,3 @@ df <- predict(process, outlier_replaced)
 # outlier_test <- sapply(outlier_replacement, findoutliers)
 # outlier_test <- data.frame(outlier_test)
 # sum(outlier_test)
-
