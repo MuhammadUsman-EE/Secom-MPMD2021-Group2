@@ -2,7 +2,8 @@
 
 
 secom_balance.smote <- function(inputDF, tVector){
-  smote_balance <- smotefamily::SMOTE(inputDF, tVector, K=5, dup_size = 0)$data
+  inputDF[, c("Status")] <- sapply(inputDF[,c("Status")], as.numeric)
+  smote_balance <- smotefamily::SMOTE(X = inputDF, target = tVector, K=5, dup_size = 0)$data
   return(smote_balance)
 }
 
@@ -19,9 +20,13 @@ secom_balance.rose <- function(tVar, inputDF){
 
 tempDF <- df[, c("Feature_1", "Feature_2", "Feature_3", "Feature_4", "Status")]
 tempDF
-smotest <- secom_balance.smote(tempDF, tempDF$Status)
-## Non-numeric error related to Status column being a factor
-rosetest <- secom_balance.rose(Status~., tempDF)
 
+smotest2 <- secom_balance.smote(tempDF, tempDF$Status)
+## Non-numeric error related to Status column being a factor
+rosetest2 <- secom_balance.rose(Status~., tempDF)
+
+table(tempDF$Status)
 table(rosetest$Status)
+prop.table(table(rosetest$Status))
 table(smotest$Status)
+
