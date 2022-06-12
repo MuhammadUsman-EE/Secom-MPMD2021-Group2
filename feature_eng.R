@@ -32,6 +32,8 @@ secom<-cbind(secom.label,secom.data)
 sum(is.na(secom))
 nrow(secom)
 
+secom$Status <- as.factor(secom$Status)
+
 # Split the dataset with respect to class variables proportions (ratio 14:1)
 ## generates indexes for randomly splitting the data into training and test sets
 # Setting seed so that the data is replicable.
@@ -40,7 +42,7 @@ set.seed(12)
 secom.train_index<-createDataPartition(secom$Status, times = 1,p = 0.8, list = FALSE)
 ## define the training and test sets by using above index
 secom.training<-secom[secom.train_index,]
-#dopping timestamp
+#dropping timestamp
 secom.test<-secom[-secom.train_index,]
 
 secom.training.label <- secom.training$Status
@@ -63,7 +65,7 @@ filterednan <- filteredDescr[, -which(colMeans(is.na(filteredDescr)) > 0.45)]
 length(filterednan)
 #=======
 #drop features with 50% or more missing values 
-filterednan <- filteredDescr[, -which(colMeans(is.na(filteredDescr)) > 0.50)]
+filterednan <- filteredDescr[, -which(colMeans(is.na(filteredDescr)) > 0.45)]
 length(filterednan)
 
 # Replace outliers with 3S boundaries
@@ -89,6 +91,16 @@ for(column_name in colnames(filterednan)) {
 }
 
 outlier_replaced <- outlier_replaced %>% select(-c(1))
+
+
+# Scaling features using Min Max Scaling method (0 - 1)
+
+process <- preProcess(outlier_replaced, method=c("range"))
+
+df <- predict(process, outlier_replaced)
+
+Status <- c(secom.training.label)
+df <- cbind(df, Status)
 
 
 #3S boundaries shift
@@ -139,26 +151,29 @@ sum(outlier_test)
 # outlier_test <- sapply(outlier_replacement, findoutliers)
 # outlier_test <- data.frame(outlier_test)
 # sum(outlier_test)
+#<<<<<<< HEAD
 
 #knn and mice imputations followed by ensemble fuction to identify the best feature
 #seleccion betweeen both of the performed impuatations methods
 ##Function :: KNN Impuatation
 # set KNN parameter
 
-secom.impute.knn <- function(secom.training){
-  secom.Knn.impute.1 <- VIM::kNN(secom.training,k =10, numFun = weightedMean)
-  secom.Knn.impute <- subset(secom.Knn.impute.1, select = c(1:ncol(secom.training)))
-  return(secom.Knn.impute)
-}
+#secom.impute.knn <- function(secom.training){
+ # secom.Knn.impute.1 <- VIM::kNN(secom.training,k =10, numFun = weightedMean)
+  #secom.Knn.impute <- subset(secom.Knn.impute.1, select = c(1:ncol(secom.training)))
+  #return(secom.Knn.impute)
+#}
 
 # #Function :: Mice Imputation
-secom.impute.mice <- function(secom.training){
-  data.mice.imputation <- mice(secom.training, m=1, maxit=1, method= "pmm", seed=500)
-  return(data.mice.imputation)
-}
+#secom.impute.mice <- function(secom.training){
+ # data.mice.imputation <- mice(secom.training, m=1, maxit=1, method= "pmm", seed=500)
+  #return(data.mice.imputation)
+#}
 
 #ensemble for imputed data algorithms, combined two methods and select best case
 #for each of the missing values that have been imputed 
 # 
 
 
+#=======
+#>>>>>>> b9f755b477bfc08e0de02efe91780e311ddc763b

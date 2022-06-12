@@ -2,12 +2,20 @@
 # set language to English
 Sys.setenv(LANG = "en")
 
-# Checking if pacman library installed or not
+# Checking if required libraries are installed or not
 if (!require("pacman")) install.packages("pacman")
+if (!require("smotefamily"))  install.packages("smotefamily")
+if (!require("ROSE"))  install.packages("ROSE")
+if (!require("performanceEstimation")) install.packages("performanceEstimation")
 
 # load pacman
 library(pacman)
-
+#load smotefamily
+library(smotefamily)
+#load ROSE
+library(ROSE)
+#load performanceEstimation
+library(performanceEstimation)
 
 p_load('tidyverse')
 p_load('tidyselect')
@@ -18,6 +26,7 @@ p_load("reshape2")
 p_load("data.table")
 p_load("caret")
 p_load('reshape2')
+p_load('DMwR2')
 
 
 # Importing SECOM dataset - Directly from Online Repository
@@ -256,3 +265,4 @@ secom.train_index<-createDataPartition(secom$Status, times = 1,p = 0.8, list = F
 secom.training<-secom[secom.train_index,]
 secom.data.train<-secom.training[,-c(1,2)]
 secom.test<-secom[-secom.train_index,]
+
