@@ -2,10 +2,11 @@
 # set language to English
 Sys.setenv(LANG = "en")
 
-# Checking if pacman library installed or not
+# Checking if required libraries are installed or not
 if (!require("pacman")) install.packages("pacman")
 if (!require("smotefamily"))  install.packages("smotefamily")
 if (!require("ROSE"))  install.packages("ROSE")
+if (!require("performanceEstimation")) install.packages("performanceEstimation")
 
 # load pacman
 library(pacman)
@@ -13,6 +14,8 @@ library(pacman)
 library(smotefamily)
 #load ROSE
 library(ROSE)
+#load performanceEstimation
+library(performanceEstimation)
 
 p_load('tidyverse')
 p_load('tidyselect')
