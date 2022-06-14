@@ -2,7 +2,7 @@
 #install.packages("devtools")
 #install.packages("mlbench")
 
-devtools::install_github("jefferis/RANN")
+#devtools::install_github("jefferis/RANN")
 library(Boruta)
 
 library("RANN")
@@ -13,6 +13,8 @@ library(caret)
 library(mlbench)
 library(Hmisc)
 library(randomForest)
+library(caret)
+
 
 #KNN Imputation function
 
@@ -35,11 +37,9 @@ return(impute_df)
 }
 
 #Apply function to df
-df_knn_imputed <- secom.knn.impute(df)
-length(df_knn_imputed)
+secom.imputed <- secom.knn.impute(secom.df)
+length(secom_imputed)
 
-df_knn_imputed_numeric<-  df_knn_imputed %>% select(-c("Status"))
-head(df_knn_imputed_numeric)
 #Boruta feature selection
 #Class has to be factor
 class(df_knn_imputed$Status)
@@ -48,11 +48,16 @@ class(df_knn_imputed$Status)
 
 boruta.df <- Boruta(Status ~ .,data = df_knn_imputed, doTrace=2)
 
+#Plot the boruta feature importance an stats of boruta - 16 features left
 plot(boruta.df,las=2)
+plotImpHistory(boruta.df)
+attStats(boruta.df)
 
 getSelectedAttributes(boruta.df)
 class(boruta.df)
 
-
-#
+#RFE feature selection random forest
+rfe.ctrl<- rfeControl(functions = rfFuncs, method = "cv",verbose = FALSE)
+subsets <-c(2:25, 30, 35, 40, 45, 50, 55, 60, 65:300)
+rfe.Profile <- rfe(x=secom.imputed[,-435],y= secom.imputed$Status, rfeControl = rfe.ctrl)
 

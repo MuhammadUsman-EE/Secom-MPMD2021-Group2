@@ -21,7 +21,7 @@ p_load("caret")
 p_load('reshape2')
 p_load("outliers")
 p_load("DescTools")
-
+library("xlsx")
 
 # Importing SECOM dataset - Directly from Online Repository
 secom.data<-read.table("https://archive.ics.uci.edu/ml/machine-learning-databases/secom/secom.data")
@@ -58,12 +58,12 @@ dim(secom.training)
 nzv <- nearZeroVar(secom.training)
 filteredDescr <- secom.training[, -nzv]
 dim(filteredDescr)
-??nearzerovar
+
 #secom training has 590, filtered 463
 
 nzv2 <-nearZeroVar(secom.training,freqCut= 95/5,uniqueCut=10)
 nzv2<-secom.training[, -nzv]
-dim(nzv2)
+
 
 #drop features with 50% or more missing values 
 filterednan <- filteredDescr[, -which(colMeans(is.na(filteredDescr)) > 0.45)]
@@ -101,8 +101,9 @@ process <- preProcess(outlier_replaced, method=c("range"))
 df <- predict(process, outlier_replaced)
 
 Status <- c(secom.training.label)
-df <- cbind(df, Status)
+secom.df <- cbind(df, Status)
 
+save(secom.df, file = "secom.df.rda")
 
 #3S boundaries shift
 # Scale the selected column
