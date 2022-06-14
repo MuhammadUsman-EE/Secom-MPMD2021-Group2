@@ -21,7 +21,7 @@ p_load("caret")
 p_load('reshape2')
 p_load("outliers")
 p_load("DescTools")
-
+p_load("mice")
 
 # Importing SECOM dataset - Directly from Online Repository
 secom.data<-read.table("https://archive.ics.uci.edu/ml/machine-learning-databases/secom/secom.data")
@@ -165,11 +165,10 @@ sum(outlier_test)
 #}
 
 # #Function :: Mice Imputation
-#secom.impute.mice <- function(secom.training){
- # data.mice.imputation <- mice(secom.training, m=1, maxit=1, method= "pmm", seed=500)
-  #return(data.mice.imputation)
-#}
-
+md.pattern(df)
+mice_imputed_Data <- mice(df, m=3, maxit = 1, method = 'pmm', seed = 500)
+save(mice_imputed_Data, file = "secomice.rda")
+View(mice_imputed_Data)
 #ensemble for imputed data algorithms, combined two methods and select best case
 #for each of the missing values that have been imputed 
 # 
