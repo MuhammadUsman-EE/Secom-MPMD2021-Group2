@@ -21,7 +21,7 @@ p_load("caret")
 p_load('reshape2')
 p_load("outliers")
 p_load("DescTools")
-
+p_load("mice")
 
 # Importing SECOM dataset - Directly from Online Repository
 secom.data<-read.table("https://archive.ics.uci.edu/ml/machine-learning-databases/secom/secom.data")
@@ -59,6 +59,11 @@ nzv <- nearZeroVar(secom.training)
 filteredDescr <- secom.training[, -nzv]
 #secom training has 590, filtered 463
 
+#<<<<<<< HEAD
+#drop features with 45% or more missing values 
+filterednan <- filteredDescr[, -which(colMeans(is.na(filteredDescr)) > 0.45)]
+length(filterednan)
+#=======
 #drop features with 50% or more missing values 
 filterednan <- filteredDescr[, -which(colMeans(is.na(filteredDescr)) > 0.45)]
 length(filterednan)
@@ -102,6 +107,29 @@ df <- cbind(df, Status)
 # Scale the selected column
 #####Outlier Identification or treatment#####
 
+#<<<<<<< HEAD
+findoutliers <- function(filterednan) {
+  # Find the outliers in the scaled column
+  flag <- ifelse(test = scale(filterednan) > 3 |  scale(filterednan) < -3, yes = 1, no = 0)
+  result <- which(flag == 1)
+  length(result)
+}
+outliers <- sapply(filterednan, findoutliers)
+outliers <- data.frame(outliers)
+print(outliers)
+sum(outliers)
+View(outliers)
+
+#bringing the outliers into the 3s boundary
+outlier_replacement <- apply(filterednan, FUN = Winsorize, MARGIN = 2, probs = c(0.001, 0.999), na.rm = TRUE)
+length(outlier_replacement)
+length(outliers)
+
+#test if there are still outliers 
+outlier_test <- sapply(outlier_replacement, findoutliers)
+outlier_test <- data.frame(outlier_test)
+sum(outlier_test)
+#=======
 # findoutliers <- function(filterednan) {
 #   # Find the outliers in the scaled column
 #   flag <- ifelse(test = scale(filterednan) > 3 |  scale(filterednan) < -3, yes = 1, no = 0)
@@ -123,3 +151,28 @@ df <- cbind(df, Status)
 # outlier_test <- sapply(outlier_replacement, findoutliers)
 # outlier_test <- data.frame(outlier_test)
 # sum(outlier_test)
+#<<<<<<< HEAD
+
+#knn and mice imputations followed by ensemble fuction to identify the best feature
+#seleccion betweeen both of the performed impuatations methods
+##Function :: KNN Impuatation
+# set KNN parameter
+
+#secom.impute.knn <- function(secom.training){
+ # secom.Knn.impute.1 <- VIM::kNN(secom.training,k =10, numFun = weightedMean)
+  #secom.Knn.impute <- subset(secom.Knn.impute.1, select = c(1:ncol(secom.training)))
+  #return(secom.Knn.impute)
+#}
+
+# #Function :: Mice Imputation
+md.pattern(df)
+mice_imputed_Data <- mice(df, m=3, maxit = 1, method = 'pmm', seed = 500)
+save(mice_imputed_Data, file = "secomice.rda")
+View(mice_imputed_Data)
+#ensemble for imputed data algorithms, combined two methods and select best case
+#for each of the missing values that have been imputed 
+# 
+
+
+#=======
+#>>>>>>> b9f755b477bfc08e0de02efe91780e311ddc763b
