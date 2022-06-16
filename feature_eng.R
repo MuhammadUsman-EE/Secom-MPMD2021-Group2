@@ -94,8 +94,8 @@ process <- preProcess(outlier_replaced, method=c("range"))
 
 df <- predict(process, outlier_replaced)
 
-Status <- c(secom.training.label)
-df <- cbind(df, Status)
+# Status <- c(secom.training.label)
+# df <- cbind(df, Status)
 
 
 #3S boundaries shift
