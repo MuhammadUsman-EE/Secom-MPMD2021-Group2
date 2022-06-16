@@ -1,6 +1,8 @@
 #Function for SMOTE balancing - call secom_balance.smote with input dataframe and target variable.
 
 secom_balance.smote <- function(inputDF, tVector){
+  Status <- c(secom.training.label)
+  inputDF <- cbind(inputDF, Status)
   inputDF[, c("Status")] <- sapply(inputDF[,c("Status")], as.numeric)
   smote_balance <- smotefamily::SMOTE(X = inputDF, target = tVector, K=5, dup_size = 0)$data
   return(smote_balance)
@@ -9,6 +11,8 @@ secom_balance.smote <- function(inputDF, tVector){
 #Function for ROSE balancing - call secom_balance.rose with input target variable and dataframe.
 
 secom_balance.rose <- function(tVar, inputDF){
+  Status <- c(secom.training.label)
+  inputDF <- cbind(inputDF, Status)
   rose_balance <- ROSE::ROSE(tVar, inputDF, p=0.5)$data
   return(rose_balance)
 }
@@ -17,6 +21,8 @@ secom_balance.rose <- function(tVar, inputDF){
 #Function for SMOTE balancing with performance estimation package
 
 secom_balance.smotePE <- function(tVar, inputDF){
+  Status <- c(secom.training.label)
+  inputDF <- cbind(inputDF, Status)
   smotePE <- performanceEstimation::smote(tVar, inputDF, perc.over = 10, perc.under = 1, k = 5)
   return(smotePE)
 }
