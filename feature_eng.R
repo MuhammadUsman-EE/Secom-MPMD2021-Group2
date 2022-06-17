@@ -113,26 +113,37 @@ source("mice_imput.R")
 source("boruta.R")
 source("rfe.R")
 source('lasso.R')
+source("df_balance.R")
 
 # KNN Imputation
 secom_imputed <- knn_impute(df)
 
 #MICE Imputation
-secom.imputed <- mice_impute(df)
+secom_imputed <- mice_impute(df)
 load(df_mice2.rda)
 
 # Boruta Feature Selection
-secom.feautes_selected <- boruta_select(secom.imputed, secom.training.label)
+secom_features_selected <- boruta_select(secom.imputed, secom.training.label)
 
 # RFE Features Selection
-secom_feautures_selected <- rfe_select(secom.imputed, secom.training.label)
+secom_features_selected <- rfe_select(secom.imputed, secom.training.label)
 
 # Lasso Feature Selection
-secom_feautures_selected <- lasso_select(secom.imputed, secom.training.label)
+secom_features_selected <- lasso_select(secom.imputed, secom.training.label)
 
 # Logistic Regression - 5 - Fold Results
-log_model_results <- log_model_run(features_selected = secom_feautures_selected, y = secom.training.label)
+log_model_results <- log_model_run(features_selected = secom_features_selected, y = secom.training.label)
 res <- evalm(log_model_results)
+
+# Data balancing using ROSE
+secom_rose_balancing <- secom_balance.rose(secom_features_selected, secom.training.label, 0.5)
+table(secom_rose_balancing$Status)
+
+# Data balacning using SMOTE
+secom_smote_balancing <- secom_balance.smote(secom_features_selected, secom.training.label, 14, 1)
+table(secom_smote_balancing$Status)
+
+
 
 
 
