@@ -21,7 +21,12 @@ p_load("caret")
 p_load('reshape2')
 p_load("outliers")
 p_load("DescTools")
-library("xlsx")
+p_load("plotROC")
+p_load("mlbench")
+p_load("MLeval")
+p_load("Boruta")
+p_load("glmnet")
+
 
 # Importing SECOM dataset - Directly from Online Repository
 secom.data<-read.table("https://archive.ics.uci.edu/ml/machine-learning-databases/secom/secom.data")
@@ -32,6 +37,8 @@ secom<-cbind(secom.label,secom.data)
 sum(is.na(secom))
 nrow(secom)
 
+secom$Status[which(secom$Status == "-1")] = "No"
+secom$Status[which(secom$Status == "1")] = "Yes"
 secom$Status <- as.factor(secom$Status)
 
 # Split the dataset with respect to class variables proportions (ratio 14:1)
@@ -93,40 +100,42 @@ for(column_name in colnames(filterednan)) {
 
 outlier_replaced <- outlier_replaced %>% select(-c(1))
 
-
 # Scaling features using Min Max Scaling method (0 - 1)
+#process <- preProcess(outlier_replaced, method=c("range"))
+#df <- predict(process, outlier_replaced)
 
-process <- preProcess(outlier_replaced, method=c("range"))
+df <- outlier_replaced
 
-df <- predict(process, outlier_replaced)
 
-Status <- c(secom.training.label)
-secom.df <- cbind(df, Status)
+# Calling Functions from other files
+source("knn_imput.R")
+source("mice_imput.R")
+source("boruta.R")
+source("rfe.R")
+source('lasso.R')
 
-save(secom.df, file = "secom.df.rda")
+# KNN Imputation
+secom_imputed <- knn_impute(df)
 
-#3S boundaries shift
-# Scale the selected column
-#####Outlier Identification or treatment#####
+#MICE Imputation
+secom.imputed <- mice_impute(df)
+load(df_mice2.rda)
 
-# findoutliers <- function(filterednan) {
-#   # Find the outliers in the scaled column
-#   flag <- ifelse(test = scale(filterednan) > 3 |  scale(filterednan) < -3, yes = 1, no = 0)
-#   result <- which(flag == 1)
-#   length(result)
-# }
-# outliers <- sapply(filterednan, findoutliers)
-# outliers <- data.frame(outliers)
-# print(outliers)
-# sum(outliers)
-# View(outliers)
-# 
-# #bringing the outliers into the 3s boundary
-# outlier_replacement <- apply(filterednan, FUN = Winsorize, MARGIN = 2, probs = c(0.001, 0.999), na.rm = TRUE)
-# length(outlier_replacement)
-# length(outliers)
-# 
-# #test if there are still outliers 
-# outlier_test <- sapply(outlier_replacement, findoutliers)
-# outlier_test <- data.frame(outlier_test)
-# sum(outlier_test)
+# Boruta Feature Selection
+secom.feautes_selected <- boruta_select(secom.imputed, secom.training.label)
+
+# RFE Features Selection
+secom_feautures_selected <- rfe_select(secom.imputed, secom.training.label)
+
+# Lasso Feature Selection
+secom_feautures_selected <- lasso_select(secom.imputed, secom.training.label)
+
+# Logistic Regression - 5 - Fold Results
+log_model_results <- log_model_run(features_selected = secom_feautures_selected, y = secom.training.label)
+res <- evalm(log_model_results)
+
+
+
+
+
+
