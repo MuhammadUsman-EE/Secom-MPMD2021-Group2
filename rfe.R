@@ -16,7 +16,7 @@ control <- rfeControl(functions = rfFuncs, # random forest
 set.seed(1)
 result_rfe1 <- rfe(x = secom.imputed, 
                    y = secom.training.label, 
-                   sizes = c(13:30),
+                   sizes = c(10:30),
                    metric = 'ROC',
                    rfeControl = control
                    #trControl = trainctrl

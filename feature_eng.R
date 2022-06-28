@@ -41,6 +41,9 @@ secom$Status[which(secom$Status == "-1")] = "No"
 secom$Status[which(secom$Status == "1")] = "Yes"
 secom$Status <- as.factor(secom$Status)
 
+secom$Status <- factor(secom$Status, levels=rev(levels(secom$Status)))
+
+
 # Split the dataset with respect to class variables proportions (ratio 14:1)
 ## generates indexes for randomly splitting the data into training and test sets
 # Setting seed so that the data is replicable.
