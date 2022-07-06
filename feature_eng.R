@@ -9,6 +9,11 @@ if (!require("pacman")) install.packages("pacman")
 # load pacman
 library(pacman)
 
+install.packages("lme4", dependencies = TRUE)
+library(lme4)
+methods(sigma)
+install.packages("pbkrtest", dependencies = TRUE)
+library(caret)
 
 p_load('tidyverse')
 p_load('tidyselect')
