@@ -1,5 +1,4 @@
 # knn imputing training data - use DF created after from replacing outliers.
-
 preProcValues <- preProcess(df,
                             method = c("knnImpute"),
                             k = 5,
@@ -14,6 +13,8 @@ sum(is.na(secom.imputed))
 
 secom.test <- secom.test %>% select(colnames(secom.imputed), Status)
 
+install.packages("randomForest")
+install.packages("ranger")
 #secom.test <- secom.test %>% mutate_all(~ifelse(is.nan(.), NA, .))
 
 test_imputed_df <- predict(preProcValues, secom.test)
